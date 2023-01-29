@@ -22,6 +22,27 @@ public class ProcessadorDePix {
    *                     entre o aplicativo e o servidor na nuvem.
    */
   public void executarPix(int valor, String chave) throws ErroDePix, IOException {
-    // TODO: Implementar.
+    if (valor <= 0) {
+      throw new ErroValorNaoPositivo();
+    }
+
+    if (chave.isBlank()) {
+      throw new ErroChaveEmBranco();
+    }
+
+    try (Conexao conexao = servidor.abrirConexao()) {
+      String resposta = conexao.enviarPix(valor, chave);
+
+      switch (resposta) {
+        case CodigosDeRetorno.SUCESSO:
+          break;
+        case CodigosDeRetorno.SALDO_INSUFICIENTE:
+          throw new ErroSaldoInsuficiente();
+        case CodigosDeRetorno.CHAVE_PIX_NAO_ENCONTRADA:
+          throw new ErroChaveNaoEncontrada();
+        default:
+          throw new ErroInterno();
+      }
+    }
   }
 }
